@@ -1,10 +1,12 @@
 #include "SensorDataHandler.h"
 
-// Define software serial pins
-#define RX_PIN 10
-#define TX_PIN 11
 
-SensorDataHandler::SensorDataHandler() : mySerial(RX_PIN, TX_PIN) {
+// Define software serial pins
+#define RX_PIN 0
+#define TX_PIN 1
+//SoftwareSerial mySerial(RX_PIN, TX_PIN);
+
+SensorDataHandler::SensorDataHandler()   {
   // Constructor, initialize SoftwareSerial object
 }
 
@@ -13,14 +15,17 @@ void SensorDataHandler::begin() {
   Serial.begin(115200); // Adjust baud rate as necessary
 
   // Initialize SoftwareSerial for sensor communication
-  mySerial.begin(9600); // Adjust baud rate to match your sensor
+  Serial1.begin(115200); // Adjust baud rate to match your sensor
   delay(100); // Ensure SoftwareSerial is ready
+  String respondDataRate = sendCommand("$1D0025*\r"); // set the data rate to 25 hz
+  String respondEuler = sendCommand("$1AES*/r"); // set the unit to work with Euler
+  Serial.println(respondDataRate);
 }
 
 void SensorDataHandler::sensorStats() {
-  String firmwareVersion = sendCommand("$nV*\r");
-  String serialNumber = sendCommand("$nS*\r");
-  String sensorType = sendCommand("$nST*\r");
+  String firmwareVersion = sendCommand("$1V*\r");
+  String serialNumber = sendCommand("$1S*\r");
+  String sensorType = sendCommand("$1ST*\r");
 
   Serial.print("Firmware Version: ");
   Serial.println(firmwareVersion);
@@ -30,16 +35,19 @@ void SensorDataHandler::sensorStats() {
   Serial.println(sensorType);
 }
 
+
+
 void SensorDataHandler::readSensorData() {
-  String sensorDataMsg = sendCommand("$CSIMU*\r");
-
+  String sensorDataMsg = sendCommand("$CSPRA*\r");
   // Parse sensor data message
-  if (sensorDataMsg.startsWith("$CSIMU")) {
-    sensorDataMsg.remove(0, 6); // Remove "$CSIMU," prefix
-
+  int startMsg= sensorDataMsg.lastIndexOf('$');
+  sensorDataMsg.remove(0, startMsg);
+  Serial.println("real massage recived: " + sensorDataMsg);
+  
+  if (sensorDataMsg.startsWith("$CSRPY")) {
     // Split the response into individual data fields
-    int dataIndex = 0;
-    while (sensorDataMsg.length() > 0 && dataIndex < 10) { // Assuming 10 fields in $CSIMU message
+    int dataIndex = -1;
+    while (sensorDataMsg.length() > 0 && dataIndex < 5) { // Assuming 10 fields in $CSRPY message
       int commaIndex = sensorDataMsg.indexOf(',');
       if (commaIndex != -1) {
         String fieldValue = sensorDataMsg.substring(0, commaIndex);
@@ -47,16 +55,9 @@ void SensorDataHandler::readSensorData() {
 
         // Assign values to respective fields
         switch (dataIndex) {
-          case 0: accelerationX = value; break;
-          case 1: accelerationY = value; break;
-          case 2: accelerationZ = value; break;
-          case 3: gyroX = value; break;
-          case 4: gyroY = value; break;
-          case 5: gyroZ = value; break;
-          case 6: magX = value; break;
-          case 7: magY = value; break;
-          case 8: magZ = value; break;
-          case 9: temperature = value; break;
+          case 0: roll = value; break;
+          case 1: pitch = value; break;
+          case 2: heading = value; break;
           default: break; // Handle unexpected data fields if necessary
         }
 
@@ -64,20 +65,7 @@ void SensorDataHandler::readSensorData() {
       } else {
         // Last field
         float value = sensorDataMsg.toFloat(); // Convert String to float
-        switch (dataIndex) {
-          case 0: accelerationX = value; break;
-          case 1: accelerationY = value; break;
-          case 2: accelerationZ = value; break;
-          case 3: gyroX = value; break;
-          case 4: gyroY = value; break;
-          case 5: gyroZ = value; break;
-          case 6: magX = value; break;
-          case 7: magY = value; break;
-          case 8: magZ = value; break;
-          case 9: temperature = value; break;
-          default: break; // Handle unexpected data fields if necessary
-        }
-        
+        temperature = value;
         sensorDataMsg = ""; // Clear response
       }
       dataIndex++;
@@ -85,15 +73,16 @@ void SensorDataHandler::readSensorData() {
   } else {
     // Handle unexpected responses or errors
     Serial.println("Unexpected response: " + sensorDataMsg);
+    sensorDataMsg="";
   }
 }
 
 String SensorDataHandler::sendCommand(String command) {
-  mySerial.print(command);
-  delay(100); // Adjust delay as needed based on sensor response time
+  Serial1.print(command);
+  delay(200); // Adjust delay as needed based on sensor response time
 
-  if (mySerial.available()) {
-    String response = mySerial.readStringUntil('\n');
+  if(Serial1.available()) {
+    String response = Serial1.readStringUntil('\n');
     return response;
   }
 
