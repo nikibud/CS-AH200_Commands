@@ -68,12 +68,12 @@ void loop() {
   digitalWrite(LD, LOW);
   digitalWrite(LU, LOW);
 
-  if ((roll < roll_ZERO - resolution && AUTO_Roll) || FU_Override) {
-    digitalWrite(FU, HIGH);
+  if ((roll < roll_ZERO - resolution && AUTO_Roll) || FD_Override) {
+    digitalWrite(FD, HIGH);
     digitalWrite(GOOD, LOW);
   }
-  if ((roll > roll_ZERO + resolution && AUTO_Roll) || FD_Override) {
-    digitalWrite(FD, HIGH);
+  if ((roll > roll_ZERO + resolution && AUTO_Roll) || FU_Override) {
+    digitalWrite(FU, HIGH);
     digitalWrite(GOOD, LOW);
   }
   
