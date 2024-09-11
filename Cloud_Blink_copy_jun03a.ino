@@ -5,12 +5,12 @@
 
 // Constants for pin definitions
 const int GOOD = 3;
-const int FU = 4;
-const int FD = 5;
-const int RU = 6;
-const int RD = 7;
-const int LU = 8;
-const int LD = 9;
+const int FU = 9;
+const int FD = 8;
+const int RU = 7;
+const int RD = 6;
+const int LU = 5;
+const int LD = 4;
 
 // Global variables
 float pitchFilteredOld;
