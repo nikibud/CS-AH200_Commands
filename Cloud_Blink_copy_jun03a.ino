@@ -5,8 +5,8 @@
 
 // Constants for pin definitions
 const int GOOD = 3;
-const int FU = 9;
-const int FD = 8;
+const int FU = 8;
+const int FD = 9;
 const int RU = 7;
 const int RD = 6;
 const int LU = 5;
@@ -68,12 +68,12 @@ void loop() {
   digitalWrite(LD, LOW);
   digitalWrite(LU, LOW);
 
-  if ((roll < roll_ZERO - resolution && AUTO_Roll) || FD_Override) {
-    digitalWrite(FD, HIGH);
+  if ((roll < roll_ZERO - resolution && AUTO_Roll) || FU_Override) {
+    digitalWrite(FU, HIGH);
     digitalWrite(GOOD, LOW);
   }
-  if ((roll > roll_ZERO + resolution && AUTO_Roll) || FU_Override) {
-    digitalWrite(FU, HIGH);
+  if ((roll > roll_ZERO + resolution && AUTO_Roll) || FD_Override) {
+    digitalWrite(FD, HIGH);
     digitalWrite(GOOD, LOW);
   }
   
